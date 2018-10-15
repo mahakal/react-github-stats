@@ -11,6 +11,8 @@ import './index.css';
 
 import {Repos, Followers, Following} from './repos.js';
 
+const userCreated = (date) => Math.floor((new Date() - new Date(date))/31557600000);
+
 class UserForm extends Component {
   constructor(props) {
     super(props);
@@ -103,7 +105,7 @@ class UserStats extends Component {
                 <p><b>Location</b>: {this.state.user.location ? this.state.user.location : "N/A"}</p>
                 <p><b>Email</b>: {this.state.user.email ? this.state.user.email : "N/A"}</p>
                 <p><b>Open to Hiring</b>: {this.state.user.hireable ? "Yes" : "No | N/A"}</p>
-                <p><b>Joined</b>: {Math.floor((new Date() - new Date(this.state.user.created_at))/31557600000)} years ago</p>
+                <p><b>Joined</b>: {userCreated(this.state.user.created_at)} years ago</p>
               </div>
             </div>
           </div>
@@ -128,7 +130,7 @@ class UserStats extends Component {
             <hr />
 
             {/*<Route path={`/user/${this.props.match.params.userId}/overview`} render={(props) => <Overview {...props} repoUrl={this.state.user.repos_url}/>}/>*/}
-            <Route path={`/user/${this.props.match.params.userId}/repos`} render={(props) => <Repos {...props} repoUrl={this.state.user.repos_url}/>}/>
+            <Route path={`/user/${this.props.match.params.userId}/repos`} render={(props) => <Repos {...props} repoUrl={this.state.user.repos_url} userName={this.state.user.name}/>}/>
             <Route path={`/user/${this.props.match.params.userId}/followers`} render={(props) => <Followers {...props} followersUrl={this.state.user.followers_url}/>}/>
             <Route path={`/user/${this.props.match.params.userId}/following`} render={(props) => <Following {...props}
             followingUrl={this.state.user.url ? this.state.user.url + "/following" : undefined}/>}/>
