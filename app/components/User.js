@@ -14,14 +14,14 @@ const userCreated = (date) => Math.floor((new Date() - new Date(date))/315576000
 export class UserForm extends Component {
   constructor(props) {
     super(props);
-    this.state = {inputNode: null};
+    this.inputNode = React.createRef();
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.history.push("/user/" + this.state.inputNode.value);
-    this.state.inputNode.value = '';
+    this.props.history.push("/user/" + this.inputNode.current.value);
+    this.inputNode.current.value = '';
   }
 
   render() {
@@ -32,7 +32,7 @@ export class UserForm extends Component {
         </div>
         <div className="d-flex justify-content-center align-content-center">
           <form onSubmit={this.handleSubmit} className="form-inline">
-            <input type="text" ref={(input) => this.state.inputNode = input} placeholder="Github User Name" className="form-control mr-2"/>
+            <input type="text" ref={this.inputNode} placeholder="Github User Name" className="form-control mr-2"/>
             <input type="submit" value="Search" className="btn btn-success my-2"/>
           </form>
         </div>
