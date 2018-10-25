@@ -5,7 +5,9 @@ import {
   Link,
 } from 'react-router-dom';
 
-import { Repos, Followers, Following } from './Repos.js';
+import Repos from './Repos.js';
+import Followers from './Followers.js';
+import Following from './Following.js';
 
 
 const userCreated = (date) => Math.floor((new Date() - new Date(date))/31557600000);

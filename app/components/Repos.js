@@ -5,7 +5,7 @@ import fetchPaginate from 'fetch-paginate';
 
 const repoCreated = (date) => Math.floor((new Date() - new Date(date))/31557600000);
 
-// TODO: change to stateless functional(generate chart only once) presentaitional component
+
 class PieChart extends Component {
 
   constructor(props) {
@@ -56,7 +56,7 @@ class PieChart extends Component {
       .sort((a,b) => a.index-b.index);
 
     let pathArray = slices.map((slice,i) =>
-      <path className="slice" d={arc(slice)} fill={i%2 ? this.state.color(i/slices.length) : this.state.color1(i/slices.length)} />
+      <path key={i} className="slice" d={arc(slice)} fill={i%2 ? this.state.color(i/slices.length) : this.state.color1(i/slices.length)} />
     );
 
     // legends
@@ -66,7 +66,7 @@ class PieChart extends Component {
     let x = 0;
 
     let textArray = slices.map((slice,i) =>
-      <text
+      <text key={i}
         fontSize={fontSize}
         fill={i%2 ? this.state.color(i/slices.length) : this.state.color1(i/slices.length)}
         // TODO: refactor ugly code
@@ -81,25 +81,24 @@ class PieChart extends Component {
           {`• ${slice.data.language} (${Math.round(slice.value*10000/totalCount)/100})`}
       </text>
     );
-    return {p: pathArray, t: textArray};
+    return {pieChart: pathArray, legend: textArray};
   }
 
   render() {
-    const d1 = this.drawPieChart(this.props.data);
+    const {pieChart, legend} = this.drawPieChart(this.props.data);
     return (
       <svg vectorEffect="non-scaling-stroke" viewBox={`0 0 ${this.state.width} ${this.state.height}`} preserveAspectRatio="xMinYMin meet">
         <g transform={`translate(${this.state.radius}, ${this.state.height/2})`}>
-          {d1.p}
+          {pieChart}
         </g>
         <g className="legend">
-          {d1.t}
+          {legend}
         </g>
       </svg>
     )
   }
 }
 
-// TODO: change to presentaitional component
 class Repo extends Component {
 
   constructor(props) {
@@ -112,7 +111,7 @@ class Repo extends Component {
 
     data.forEach((repo, i) => {
       repoData.push(
-        <div className="card text-white bg-dark mb-3">
+        <div className="card text-white bg-dark mb-3" key={i}>
 
           <div className="card-header">
             <div className="card-title d-flex justify-content-between">
@@ -148,7 +147,7 @@ class Repo extends Component {
   }
 }
 
-export class Repos extends Component {
+class Repos extends Component {
   constructor(props) {
     super(props);
     this.state = {repos: [], languagesCount: []};
@@ -159,7 +158,7 @@ export class Repos extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if(nextProps.repoUrl !== this.props.repoUrl )
+    if(nextProps.repoUrl !== this.props.repoUrl)
       this.initialize(nextProps.repoUrl);
   }
 
@@ -171,7 +170,7 @@ export class Repos extends Component {
         'user-agent': 'Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion',
       },
     }).then(({ res, data }) => {
-      // TODO: use all languages of the all repo's for pie chart calculations.
+      // TODO: use all languages of all repo's for pie chart calculations.
       let userRepos = data.filter(repo => repo.fork === false).sort((a,b) => b.stargazers_count-a.stargazers_count);
       this.setState({repos: userRepos});
     });
@@ -212,99 +211,4 @@ export class Repos extends Component {
   }
 }
 
-export class Followers extends Component {
-  constructor(props) {
-    super(props);
-    this.genFollowersNames = this.genFollowersNames.bind(this);
-    this.state = {followers: []};
-  }
-
-  componentDidMount() {
-    this.initialize(this.props.followersUrl);
-  }
-
-
-  componentWillReceiveProps(nextProps) {
-    this.initialize(nextProps.followersUrl);
-  }
-
-  initialize(followersUrl) {
-    fetch(followersUrl, {
-      headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-      'user-agent': 'Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion',
-      }
-    })
-    .then((response) => response.json())
-    .then((jsonResponse) => this.setState({followers: jsonResponse}));
-  }
-
-  genFollowersNames() {
-    let followersNames = [];
-    this.state.followers.forEach(function(follower, i) {
-      followersNames.push(<li key={i}><a href={follower.html_url}>{follower.login}</a></li>);
-    });
-    return followersNames;
-  }
-
-  render() {
-    return (
-      this.state.followers.length === 0 ?
-      <div className="d-flex justify-content-center"><h1>Fetching Followers</h1></div>
-      :
-      <div>
-        <p>Followers</p>
-        <ul>{this.genFollowersNames()}</ul>
-      </div>
-    )
-  }
-}
-
-export class Following extends Component {
-  constructor(props) {
-    super(props);
-    this.genFollowingNames = this.genFollowingNames.bind(this);
-    this.state = {following: []};
-  }
-
-  componentDidMount() {
-    this.initialize(this.props.followingUrl);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.initialize(nextProps.followingUrl);
-  }
-
-  initialize(followingUrl) {
-    fetch(followingUrl, {
-      headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-      'user-agent': 'Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion',
-      }
-    })
-    .then((response) => response.json())
-    .then((jsonResponse) => this.setState({following: jsonResponse}));
-  }
-
-  genFollowingNames() {
-    let followingNames = [];
-    this.state.following.forEach(function(following, i) {
-      followingNames.push(<li key={i}><a href={following.html_url}>{following.login}</a></li>);
-    });
-    return followingNames;
-  }
-
-  render() {
-    return (
-      this.state.following.length === 0 ?
-      <div className="d-flex justify-content-center"><h1>Fetching Following</h1></div>
-      :
-      <div>
-        <p>Following</p>
-        <ul>{this.genFollowingNames()}</ul>
-      </div>
-    )
-  }
-}
+export default Repos;
