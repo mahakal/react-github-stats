@@ -93,62 +93,66 @@ export class UserStats extends Component {
       'user-agent': 'Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion',
       }
     })
-    .then((response) => response.json())
-    .then((jsonResponse) => this.setState({user: jsonResponse}));
+    .then(res => {
+      if (!res.ok)
+        throw Error(res.statusText);
+      return res.json();
+    })
+    .then(res => this.setState({user: res}))
+    .catch(err => {
+      console.log(err);
+      this.setState({user: {"error": err.message}});
+    });
   }
 
-  render() {
+  getUser() {
     const user = this.state.user;
     const userId = this.props.match.params.userId;
-    return (
-      (Object.keys(user).length === 0 && user.constructor === Object) ?
-
-      <div> </div>
-
-      :
-
-      <Router>
-        <div >
-          <div className="container-fluid">
-
-            <div className="row">
-              <div className="col-12 col-lg-3 p-0 d-flex justify-content-center align-items-center">
-                <h3>User Profile</h3>
+    if(Object.keys(user).length === 0 && user.constructor === Object)
+      return <div> </div>;
+    else if(user.hasOwnProperty("error"))
+      return <h1 className="text-center">{user.error}</h1>;
+    else
+      return (
+        <Router>
+          <div >
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-12 col-lg-3 p-0 d-flex justify-content-center align-items-center">
+                  <h3>User Profile</h3>
+                </div>
               </div>
+              <br/>
+              <UserProfile userData={user}/>
             </div>
 
-            <br/>
+            <br />
+            <hr />
 
-            <UserProfile userData={user}/>
-
-          </div>
-
-          <br />
-          <hr />
-
-          <div>
-            <ul className="nav nav-pills nav-fill">
+            <ul className="nav nav-fill">
               <li className="nav-item">
-                <Link className="nav-link" to={`/user/${userId}/repos`}>Repositories <br/>{user.public_repos} </Link>
+                <Link to={`/user/${userId}/repos`}>Repositories <br/>{user.public_repos} </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to={`/user/${userId}/followers`}>Followers <br/>{user.followers} </Link>
+                <Link to={`/user/${userId}/followers`}>Followers <br/>{user.followers} </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to={`/user/${userId}/following`}>Following <br/>{user.following} </Link>
+                <Link to={`/user/${userId}/following`}>Following <br/>{user.following} </Link>
               </li>
             </ul>
-            </div>
 
             <hr />
 
-            {/*<Route path={`/user/${this.props.match.params.userId}/overview`} render={(props) => <Overview {...props} repoUrl={this.state.user.repos_url}/>}/>*/}
             <Route path={`/user/${userId}/repos`} render={(props) => <Repos {...props} repoUrl={user.repos_url} userName={user.name}/>}/>
             <Route path={`/user/${userId}/followers`} render={(props) => <Followers {...props} followersUrl={user.followers_url}/>}/>
             <Route path={`/user/${userId}/following`} render={(props) => <Following {...props} followingUrl={user.url + "/following"}/>}/>
-        </div>
-      </Router>
-    )
+          </div>
+        </Router>
+      );
+  }
+
+  render() {
+    return this.getUser();
   }
 
 }

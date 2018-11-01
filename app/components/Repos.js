@@ -69,7 +69,6 @@ class PieChart extends Component {
       <text key={i}
         fontSize={fontSize}
         fill={i%2 ? this.state.color(i/slices.length) : this.state.color1(i/slices.length)}
-        // TODO: refactor ugly code
         x={(function(ref) {
             const x = ref.state.xOffset + rowOffset;
             if (((20 * i) % (ref.state.height-20)) + 20 === ref.state.height-20)
@@ -78,7 +77,7 @@ class PieChart extends Component {
           })(this)
         }
         y={((20 * i) % (this.state.height-20)) + 20}>
-          {`• ${slice.data.language} (${Math.round(slice.value*10000/totalCount)/100})`}
+          {`■ ${slice.data.language} (${Math.round(slice.value*10000/totalCount)/100})`}
       </text>
     );
     return {pieChart: pathArray, legend: textArray};
@@ -111,7 +110,7 @@ class Repo extends Component {
 
     data.forEach((repo, i) => {
       repoData.push(
-        <div className="card text-white bg-dark mb-3" key={i}>
+        <div className="card mb-3" key={i}>
 
           <div className="card-header">
             <div className="card-title d-flex justify-content-between">
@@ -150,7 +149,7 @@ class Repo extends Component {
 class Repos extends Component {
   constructor(props) {
     super(props);
-    this.state = {repos: [], languagesCount: []};
+    this.state = {repos: [], userRepoCount: -1};
   }
 
   componentDidMount() {
@@ -169,45 +168,50 @@ class Repos extends Component {
         'Content-Type': 'application/json',
         'user-agent': 'Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion',
       },
-    }).then(({ res, data }) => {
-      // TODO: use all languages of all repo's for pie chart calculations.
-      let userRepos = data.filter(repo => repo.fork === false).sort((a,b) => b.stargazers_count-a.stargazers_count);
-      this.setState({repos: userRepos});
+    }).then(({res, data}) => {
+      const userRepos = data.filter(repo => repo.fork === false).sort((a,b) => b.stargazers_count-a.stargazers_count);
+      this.setState({repos: userRepos, userRepoCount: userRepos.length});
     });
   }
 
+  genRepos() {
+    if (this.state.userRepoCount === -1)
+      return <div className="d-flex justify-content-center"><h1>Fetching Repos</h1></div>;
+    else if(this.state.userRepoCount === 0)
+      return <div className="d-flex justify-content-center"><h1>{"User has no Repos of it's own"}</h1></div>;
+    else
+      return (
+        <div className="container-fluid">
+
+          <div className="row">
+            <div className="col">
+              <h4 className="text-center mb-3">Languages used by {this.props.userName ? this.props.userName : "User"}</h4>
+              <PieChart data={this.state.repos}/>
+            </div>
+          </div>
+
+          <br/>
+
+          <div className="row">
+            <div className="col">
+              <h2 className="text-center mb-3">Users Repositories</h2>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-1"></div>
+            <div className="col-10">
+              <Repo data={this.state.repos}/>
+            </div>
+            <div className="col-1"></div>
+          </div>
+
+        </div>
+      );
+  }
+
   render() {
-    return (
-      // TODO: check for empty result(No user repos) repos = [{}]
-      this.state.repos.length === 0 ?
-      <div className="d-flex justify-content-center"><h1>Fetching Repos</h1></div>
-      :
-      <div className="container-fluid">
-        {/* TODO: floating sidebar for arranging repos acc. to stars, forks, primary language, etc.
-            TODO: consistent layout for repos, follower, following */}
-        <div className="row">
-          <div className="col">
-            <h4 className="text-center">Languages used by {this.props.userName ? this.props.userName : "User"}</h4>
-            <PieChart data={this.state.repos}/>
-          </div>
-        </div>
-
-        <br/>
-
-        <div className="row">
-          <div className="col">
-            <h2>Users Repositories</h2>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col">
-            <Repo data={this.state.repos}/>
-          </div>
-        </div>
-
-      </div>
-    )
+    return this.genRepos();
   }
 }
 
