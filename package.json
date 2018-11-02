@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --open",
-    "build": "webpack"
+    "build": "webpack -p"
   },
   "repository": "https://github.com/mahakal/react-github-stats",
   "author": "Krishna Tripathi",

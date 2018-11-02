@@ -47,25 +47,36 @@ export class UserForm extends Component {
 const UserProfile = ({userData}) => {
   const {avatar_url, name, bio, company, blog, location, email, hireable, created_at} = userData;
   return (
-      <div className="row">
+    <div className="container-fluid">
 
+      <div className="row">
+        <div className="col-12 col-lg-3 p-0 d-flex justify-content-center align-items-center">
+          <h3>User Profile</h3>
+        </div>
+      </div>
+
+      <br/>
+
+      <div className="row">
         <div className="col-12 col-lg-3 p-0 d-flex justify-content-center align-items-center">
           <img className="rounded-circle p-1" src={avatar_url} height="250" width="250" alt="profile"/>
           <br/>
         </div>
-
         <div className="col-9 col-lg-9">
-          <p><b>Name</b>: {name ? name : "N/A"}</p>
+          <div className="d-flex justify-content-between">
+            <div><p><b>Name</b>: {name ? name : "N/A"}</p></div>
+            <div><p><b>Joined</b>: {userCreated(created_at)} years ago</p></div>
+          </div>
           <p><b>Bio</b>: {bio ? bio : "N/A"}</p>
-          <p><b>Company</b>: {company ? company : "N/A"}</p>
           <p><b>Blog</b>: {blog ? blog : "N/A"}</p>
-          <p><b>Location</b>: {location ? location : "N/A"}</p>
           <p><b>Email</b>: {email ? email : "N/A"}</p>
+          <p><b>Location</b>: {location ? location : "N/A"}</p>
+          <p><b>Company</b>: {company ? company : "N/A"}</p>
           <p><b>Open to Hiring</b>: {hireable ? "Yes" : "No | N/A"}</p>
-          <p><b>Joined</b>: {userCreated(created_at)} years ago</p>
         </div>
-
       </div>
+
+    </div>
   )
 }
 
@@ -116,33 +127,15 @@ export class UserStats extends Component {
       return (
         <Router>
           <div >
-            <div className="container-fluid">
-              <div className="row">
-                <div className="col-12 col-lg-3 p-0 d-flex justify-content-center align-items-center">
-                  <h3>User Profile</h3>
-                </div>
-              </div>
-              <br/>
-              <UserProfile userData={user}/>
-            </div>
-
+            <UserProfile userData={user}/>
             <br />
             <hr />
-
             <ul className="nav nav-fill">
-              <li className="nav-item">
-                <Link to={`/user/${userId}/repos`}>Repositories <br/>{user.public_repos} </Link>
-              </li>
-              <li className="nav-item">
-                <Link to={`/user/${userId}/followers`}>Followers <br/>{user.followers} </Link>
-              </li>
-              <li className="nav-item">
-                <Link to={`/user/${userId}/following`}>Following <br/>{user.following} </Link>
-              </li>
+              <li className="nav-item"><Link to={`/user/${userId}/repos`}>Repositories <br/>{user.public_repos} </Link></li>
+              <li className="nav-item"><Link to={`/user/${userId}/followers`}>Followers <br/>{user.followers} </Link></li>
+              <li className="nav-item"><Link to={`/user/${userId}/following`}>Following <br/>{user.following} </Link></li>
             </ul>
-
             <hr />
-
             <Route path={`/user/${userId}/repos`} render={(props) => <Repos {...props} repoUrl={user.repos_url} userName={user.name}/>}/>
             <Route path={`/user/${userId}/followers`} render={(props) => <Followers {...props} followersUrl={user.followers_url}/>}/>
             <Route path={`/user/${userId}/following`} render={(props) => <Following {...props} followingUrl={user.url + "/following"}/>}/>
